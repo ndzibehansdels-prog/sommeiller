@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="monetag" content="6a0430ba18601d5c5de196116c0277ad">
+<script src="https://quge5.com/88/tag.min.js" data-zone="301435" async data-cfasync="false"></script>
+<title>TURN BOOM - SOMMEILLER</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f0f24;color:#fff;font-family:Arial,sans-serif;display:flex;justify-content:center;padding:10px;min-height:100vh}
+#app{width:100%;max-width:380px;background:#1c1c38;border-radius:18px;padding:12px;border:1px solid #333;text-align:center}
+h1{color:#ffd84d;font-size:18px;letter-spacing:2px}
+#topBar{display:flex;justify-content:space-between;align-items:center;margin:6px 0}
+.iconBtn{width:36px;height:36px;border-radius:10px;border:1px solid #444;background:#252545;color:#fff;cursor:pointer}
+#stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.statBox{background:#12112a;border-radius:10px;padding:8px;border:1px solid #444;text-align:left}
+.statBox.pts{border-color:#5cff8a}
+.statBox.obj{border-color:#ffd84d}
+.statLabel{font-size:9px;color:#aaa}
+.statValue{font-size:13px;font-weight:900;margin-top:2px}
+.green{color:#5cff8a}.yellow{color:#ffd84d}
+#progress{width:100%;height:8px;background:#111;border-radius:10px;margin-top:6px;overflow:hidden}
+#fill{height:100%;background:#ffd84d;width:0%;transition:.4s}
+#clueBox{background:#0a0a18;border:2px solid #ffd84d;border-radius:12px;padding:10px;margin:8px 0;text-align:left}
+#emptyBoxes{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;justify-content:center}
+.empty{width:32px;height:36px;background:#fff;color:#000;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;border:2px solid #333}
+.empty.filled{background:#5cff8a;border-color:#5cff8a}
+#grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;background:#0a0a18;padding:8px;border-radius:12px;margin:10px 0;min-height:210px}
+.cell{aspect-ratio:1;background:#252545;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;border:2px solid transparent;cursor:pointer}
+.cell.sel{border-color:#ffd84d;background:#3a3a6a;opacity:0.5}
+.btn-row{display:flex;gap:6px;margin-top:6px}
+button{flex:1;padding:11px 4px;border:none;border-radius:10px;font-weight:900;font-size:11px;cursor:pointer}
+#validB{background:#5cff8a;color:#000;width:100%;font-size:14px;padding:14px;margin-top:6px}
+#clearB,#hintB{background:#333;color:#fff}
+#watchB{background:#ffd84d;color:#000;width:100%;margin-top:8px;padding:12px;font-size:12px;font-weight:900}
+#moreB{background:#8a5cff;color:#fff;width:100%;margin-top:8px;padding:11px;font-size:11px}
+#words{font-size:11px;color:#aaa;text-align:left;margin-top:8px}
+#msg{font-size:12px;color:#ffd84d;height:18px;margin-top:6px;font-weight:900}
+.popup{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:99;padding:15px}
+.popBox{background:#1c1c38;border-radius:16px;padding:18px;width:100%;max-width:360px;border:1px solid #555;text-align:left}
+.opt{background:#252545;padding:10px;border-radius:10px;margin:8px 0;display:flex;justify-content:space-between;align-items:center}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="topBar"><button class="iconBtn" onclick="openHelp()">?</button><h1>TURN BOOM</h1><button class="iconBtn" onclick="resetGame()">R</button></div>
+<div id="stats"><div class="statBox pts"><div class="statLabel">POINTS</div><div id="score" class="statValue green">0 PTS</div></div><div class="statBox obj"><div class="statLabel">OBJECTIF Niv <span id="lvl">1</span></div><div class="statValue yellow"><span id="wordsCount">0</span> / <span id="wordsGoal">6</span></div><div id="progress"><div id="fill"></div></div></div></div>
+<div id="clueBox"><div id="clueLeft">TROUVE LE SYNONYME DE :</div><div id="clueWord">"<span id="clueText">JOYEUX</span>"</div><div style="font-size:10px;color:#aaa;text-align:right">SYNONYME<br><span id="clueSmall" style="color:#5cff8a;font-size:11px">content</span></div><div>Mot a trouver: <span id="lenInfo">7 lettres</span></div><div id="emptyBoxes"></div></div>
+<div id="grid"></div>
+<div class="btn-row"><button id="clearB">EFFACER</button><button id="hintB">AIDE 50 PTS</button></div>
+<button id="validB">VALIDER</button>
+<button id="watchB">PUB +100 PTS</button>
+<button id="moreB">BONUS & POINTS</button>
+<div id="words"><b>Trouves:</b> <span id="found"></span></div>
+<div id="msg"></div>
+</div>
+<div id="levelUpPop" class="popup"><div class="popBox" style="text-align:center"><h2 style="color:#ffd84d">NIVEAU REUSSI !</h2><p id="levelUpMsg" style="margin:10px 0;color:#fff"></p><div style="background:#0f0f24;padding:10px;border-radius:10px;margin:10px 0"><span id="keepPoints" style="color:#5cff8a;font-size:18px"></span><br><span id="nextObj" style="color:#fff;font-size:13px"></span></div><button onclick="closeLevelUp()" style="width:100%;background:#5cff8a;color:#000;padding:14px;border-radius:12px;border:none;font-weight:900">CONTINUER</button></div></div>
+<div id="popup" class="popup"><div class="popBox"><h3 style="color:#ffd84d;text-align:center">BONUS</h3><div class="opt"><div><b>BONUS 1 LETTRE</b><br><small>Rempli 1 case vide</small></div><button onclick="buyOneLetter()" style="background:#5cff8a;color:#000;padding:8px 12px;border-radius:8px;border:none;font-weight:900">50 PTS</button></div><div class="opt"><div><b>REVELER MOT</b><br><small>Donne le mot</small></div><button onclick="buyWord()" style="background:#8a5cff;color:#fff;padding:8px 12px;border-radius:8px;border:none;font-weight:900">100 PTS</button></div><button onclick="closePop()" style="width:100%;background:#333;color:#fff;margin-top:10px;padding:10px;border-radius:8px;border:none">FERMER</button></div></div>
+<div id="helpPop" class="popup"><div class="popBox"><h3 style="color:#ffd84d;text-align:center">COMMENT JOUER ?</h3><div style="font-size:13px;color:#fff;margin-top:10px;line-height:1.5"><b>1.</b> Mot JOYEUX en haut<br><b>2.</b> Cases vides = synonyme a trouver<br><b>3.</b> Tape lettres de la grille<br><b>4.</b> Clique VALIDER</div><button onclick="closeHelp()" style="width:100%;background:#5cff8a;color:#000;margin-top:14px;padding:12px;border-radius:10px;border:none;font-weight:900">J'AI COMPRIS</button></div></div>
+<script>
+const synonymPairs=[{word:"HEUREUX",clue:"JOYEUX",small:"content"},{word:"RAPIDE",clue:"VITE",small:"vite"},{word:"MAISON",clue:"LOGIS",small:"habitat"},{word:"GRAND",clue:"IMMENSE",small:"grand"},{word:"BEAU",clue:"JOLI",small:"joli"},{word:"MANGER",clue:"DEVORER",small:"manger"},{word:"DORMIR",clue:"SOMMEILLER",small:"dormir"},{word:"BOOM",clue:"EXPLOSION",small:"bruit"},{word:"NORD",clue:"HAUT",small:"haut"},{word:"STAR",clue:"ETOILE",small:"etoile"},{word:"AMI",clue:"COPAIN",small:"ami"},{word:"AIMER",clue:"ADORER",small:"aimer"},{word:"JOUER",clue:"SAMUSER",small:"jouer"},{word:"GAGNER",clue:"REUSSIR",small:"victoire"}];
+const letters=["A","E","I","O","U","R","S","T","L","N","M","P","B","C","D","H","V","G","J"];
+const levelGoals={1:6,2:10,3:15,4:20,5:25};
+let grid=[],currentInput=[],score=0,lvl=1,foundSet=new Set(),currentPair=null;
+const gridEl=document.getElementById("grid"),emptyBoxesEl=document.getElementById("emptyBoxes"),scoreEl=document.getElementById("score"),lvlEl=document.getElementById("lvl"),foundEl=document.getElementById("found"),msgEl=document.getElementById("msg");
+const wordsCountEl=document.getElementById("wordsCount"),wordsGoalEl=document.getElementById("wordsGoal"),fill=document.getElementById("fill"),clueTextEl=document.getElementById("clueText"),clueSmallEl=document.getElementById("clueSmall"),lenInfoEl=document.getElementById("lenInfo");
+const popup=document.getElementById("popup"),helpPop=document.getElementById("helpPop"),levelUpPop=document.getElementById("levelUpPop");
+function getGoal(l){return levelGoals[l]||35;}
+function pickNewPair(){let avail=synonymPairs.filter(p=>!foundSet.has(p.word));if(avail.length===0){avail=synonymPairs;foundSet.clear();foundEl.textContent="";}currentPair=avail[Math.floor(Math.random()*avail.length)];clueTextEl.textContent=currentPair.clue;clueSmallEl.textContent=currentPair.small;lenInfoEl.textContent=currentPair.word.length+" lettres";buildEmptyBoxes(currentPair.word.length);currentInput=[];ensureLettersInGrid(currentPair.word);clearSelection();}
+function buildEmptyBoxes(n){emptyBoxesEl.innerHTML="";for(let i=0;i<n;i++){let d=document.createElement("div");d.className="empty";d.id="box"+i;d.textContent="";emptyBoxesEl.appendChild(d);}}
+function ensureLettersInGrid(word){for(let k=0;k<word.length;k++){let pos=Math.floor(Math.random()*36);if(gridEl.children[pos]){grid[pos]=word[k];gridEl.children[pos].textContent=word[k];}}}
+function updateObjective(){let goal=getGoal(lvl);wordsCountEl.textContent=foundSet.size;wordsGoalEl.textContent=goal;fill.style.width=Math.min(100,(foundSet.size/goal)*100)+"%";if(foundSet.size>=goal){document.getElementById("levelUpMsg").textContent="Tu as trouve "+goal+" synonymes !";document.getElementById("keepPoints").textContent=score+" PTS conserves";document.getElementById("nextObj").textContent="Niveau "+(lvl+1)+" - "+getGoal(lvl+1)+" MOTS";levelUpPop.style.display="flex";}}
+function closeLevelUp(){levelUpPop.style.display="none";lvl++;lvlEl.textContent=lvl;foundSet.clear();foundEl.textContent="";wordsCountEl.textContent=0;updateObjective();pickNewPair();}
+function init(){grid=[];gridEl.innerHTML="";for(let i=0;i<36;i++){let l=letters[Math.floor(Math.random()*letters.length)];grid.push(l);let d=document.createElement("div");d.className="cell";d.textContent=l;d.onclick=function(){tap(i);};gridEl.appendChild(d);}updateObjective();pickNewPair();}
+function tap(i){if(currentInput.length>=currentPair.word.length)return;let letter=grid[i];currentInput.push(letter);let idx=currentInput.length-1;let box=document.getElementById("box"+idx);if(box){box.textContent=letter;box.classList.add("filled");}gridEl.children[i].classList.add("sel");}
+function clearSelection(){currentInput=[];for(let i=0;i<emptyBoxesEl.children.length;i++){emptyBoxesEl.children[i].textContent="";emptyBoxesEl.children[i].classList.remove("filled");}for(let j=0;j<gridEl.children.length;j++)gridEl.children[j].classList.remove("sel");}
+function showMsg(t){msgEl.textContent=t;setTimeout(function(){msgEl.textContent="";},3000);}
+document.getElementById("clearB").onclick=function(){clearSelection();}
+document.getElementById("hintB").onclick=function(){buyOneLetter();}
+document.getElementById("watchB").onclick=function(){score+=100;scoreEl.textContent=score+" PTS";showMsg("+100 PTS");}
+document.getElementById("moreB").onclick=function(){popup.style.display="flex";}
+function closePop(){popup.style.display="none";}
+function openHelp(){helpPop.style.display="flex";}
+function closeHelp(){helpPop.style.display="none";}
+function buyOneLetter(){if(score<50){showMsg("IL FAUT 50 PTS");return;}if(currentInput.length>=currentPair.word.length)return;score-=50;scoreEl.textContent=score+" PTS";let nextLetter=currentPair.word[currentInput.length];currentInput.push(nextLetter);let idx=currentInput.length-1;let box=document.getElementById("box"+idx);if(box){box.textContent=nextLetter;box.classList.add("filled");}showMsg("LETTRE: "+nextLetter+" -50 PTS");closePop();}
+function buyWord(){if(score<100){showMsg("IL FAUT 100 PTS");return;}score-=100;scoreEl.textContent=score+" PTS";currentInput=currentPair.word.split("");for(let i=0;i<currentInput.length;i++){let box=document.getElementById("box"+i);if(box){box.textContent=currentInput[i];box.classList.add("filled");}}showMsg("MOT: "+currentPair.word);closePop();setTimeout(function(){validateWord();},800);}
+function resetGame(){if(!confirm("Recommencer ?"))return;score=0;lvl=1;foundSet.clear();scoreEl.textContent="0 PTS";lvlEl.textContent=1;foundEl.textContent="";init();}
+function validateWord(){let w=currentInput.join("");if(w.length!==currentPair.word.length){showMsg("Rempli toutes les cases !");return;}if(w===currentPair.word){foundSet.add(w);let g=w.length*15;score+=g;foundEl.textContent=Array.from(foundSet).join(", ");scoreEl.textContent=score+" PTS";showMsg("BRAVO ! "+w+" = synonyme de "+currentPair.clue+" +"+g);for(let j=0;j<gridEl.children.length;j++)gridEl.children[j].classList.remove("sel");updateObjective();if(foundSet.size<getGoal(lvl))setTimeout(pickNewPair,1000);}else{showMsg("Ce n est pas le bon synonyme !");}}
+document.getElementById("validB").onclick=function(){validateWord();}
+init();
+</script>
+</body>
+</html>
